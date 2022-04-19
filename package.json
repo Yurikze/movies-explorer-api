@@ -1,0 +1,31 @@
+{
+  "name": "movies-explorer-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yurikze/movies-explorer-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Yurikze/movies-explorer-api/issues"
+  },
+  "homepage": "https://github.com/Yurikze/movies-explorer-api#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.15",
+    "prettier": "^2.6.2",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.5.0"
+  },
+  "dependencies": {
+    "eslint": "^8.13.0",
+    "express": "^4.17.3"
+  }
+}
