@@ -4,22 +4,28 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { CastError } = require('../Error/CastError');
 const { NotFoundError } = require('../Error/NotFoundError');
+const { NotValidError } = require('../Error/NotValidError');
+const { ConflictError } = require('../Error/ConflictError');
 
-module.exports.createUser = async (req, res) => {
+module.exports.createUser = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const hashPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ email, password: hashPassword });
     res.status(200).send(user);
   } catch (err) {
-    res.send(err);
+    if (err.name === 'MongoServerError' && err.code === 11000) {
+      next(new ConflictError('Такой Email существует'));
+    } else {
+      next(err);
+    }
   }
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
-  User.findUserByCredentials(email, password)
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
@@ -33,12 +39,10 @@ module.exports.login = (req, res) => {
         })
         .send({
           token,
-          user
+          user,
         });
     })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
-    });
+    .catch(next);
 };
 
 module.exports.getMe = async (req, res, next) => {
@@ -52,6 +56,29 @@ module.exports.getMe = async (req, res, next) => {
   } catch (error) {
     if (error.name === 'CastError') {
       next(new CastError('Некорректный id пользователя'));
+    } else {
+      next(error);
+    }
+  }
+};
+
+module.exports.updateMe = async (req, res, next) => {
+  const userId = req.user._id;
+  const { name, email } = req.body;
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { name, email },
+      { new: true, runValidators: true }
+    );
+    if (!user) {
+      throw new NotFoundError('Пользователь с id не найден');
+    }
+    res.status(200).send(user);
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      next(new NotValidError('Некорректные данные'));
     } else {
       next(error);
     }
