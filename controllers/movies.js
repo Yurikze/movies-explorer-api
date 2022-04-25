@@ -43,8 +43,14 @@ module.exports.saveMovie = (req, res, next) => {
     });
 };
 
-module.exports.getMovies = (req, res) => {
-  Movie.find({}).then((movies) => res.send(movies));
+module.exports.getMovies = async (req, res, next) => {
+  const userId = req.user._id;
+  try {
+    const movies = await Movie.find({ owner: userId });
+    res.status(200).send(movies);
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports.removeMovie = (req, res, next) => {

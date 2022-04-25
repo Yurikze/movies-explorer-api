@@ -43,11 +43,23 @@ module.exports.login = (req, res, next) => {
           httpOnly: true,
         })
         .send({
-          token,
-          user,
+          email: user.email,
+          name: user.name,
         });
     })
     .catch(next);
+};
+
+module.exports.logout = (req, res) => {
+  res
+    .cookie('jwt', 'jwt.token.revoked', {
+      httpOnly: true,
+      sameSite: true,
+      maxAge: -1,
+    })
+    .send({
+      message: 'Сессия завершена',
+    });
 };
 
 module.exports.getMe = async (req, res, next) => {
