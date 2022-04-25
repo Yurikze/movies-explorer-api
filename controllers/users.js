@@ -12,13 +12,18 @@ module.exports.createUser = async (req, res, next) => {
   try {
     const hashPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ email, password: hashPassword });
-    res.status(200).send(user);
+    res.status(200).send({
+      email: user.email,
+      name: user.name,
+    });
   } catch (err) {
     if (err.name === 'MongoServerError' && err.code === 11000) {
       next(new ConflictError('Такой Email существует'));
-    } else {
-      next(err);
     }
+    if (err.name === 'ValidationError') {
+      next(new NotValidError('Некорректые данные'));
+    }
+    next(err);
   }
 };
 
