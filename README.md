@@ -1,3 +1,3 @@
 # movies-explorer-api
 
-API приложения работает на публичном адресе [https://movie.students.nomoredomains.xyz]
+API приложения работает на публичном адресе [https://api.movie.students.nomoredomains.xyz/api/]
