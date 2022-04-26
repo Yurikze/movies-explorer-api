@@ -5,7 +5,7 @@ require('dotenv').config();
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const helmet = require('helmet');
-const { appRouter } = require('./routes');
+const { router } = require('./routes');
 const cors = require('./middlewares/cors');
 const error = require('./middlewares/error');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -27,7 +27,7 @@ app.use(cors);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-appRouter(app);
+app.use('/api', router);
 
 app.use(errors());
 app.use(error);
