@@ -20,7 +20,7 @@ mongoose.connect(DB, {
   useNewUrlParser: true,
 });
 
-// app.use(limiter);
+app.use(limiter);
 app.use(helmet());
 app.use(requestLogger);
 app.use(cors);
