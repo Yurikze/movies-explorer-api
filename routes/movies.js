@@ -36,7 +36,7 @@ router.post(
       nameEN: Joi.string().required(),
     }),
   }),
-  saveMovie
+  saveMovie,
 );
 
 router.get('/', getMovies);
@@ -45,10 +45,10 @@ router.delete(
   '/:movieId',
   celebrate({
     params: Joi.object().keys({
-      movieId: Joi.string().length(24).hex(),
+      movieId: Joi.string().hex(),
     }),
   }),
-  removeMovie
+  removeMovie,
 );
 
 module.exports = router;

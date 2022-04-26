@@ -2,16 +2,15 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { CastError } = require('../Error/CastError');
 const { NotFoundError } = require('../Error/NotFoundError');
 const { NotValidError } = require('../Error/NotValidError');
 const { ConflictError } = require('../Error/ConflictError');
 
 module.exports.createUser = async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, name } = req.body;
   try {
     const hashPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, password: hashPassword });
+    const user = await User.create({ email, password: hashPassword, name });
     res.status(200).send({
       email: user.email,
       name: user.name,
@@ -22,8 +21,9 @@ module.exports.createUser = async (req, res, next) => {
     }
     if (err.name === 'ValidationError') {
       next(new NotValidError('Некорректые данные'));
+    } else {
+      next(err);
     }
-    next(err);
   }
 };
 
@@ -35,7 +35,7 @@ module.exports.login = (req, res, next) => {
       const token = jwt.sign(
         { _id: user._id },
         NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
-        { expiresIn: '7d' }
+        { expiresIn: '7d' },
       );
       res
         .cookie('jwt', token, {
@@ -71,11 +71,7 @@ module.exports.getMe = async (req, res, next) => {
     }
     res.status(200).send({ data: user });
   } catch (error) {
-    if (error.name === 'CastError') {
-      next(new CastError('Некорректный id пользователя'));
-    } else {
-      next(error);
-    }
+    next(error);
   }
 };
 
@@ -87,7 +83,7 @@ module.exports.updateMe = async (req, res, next) => {
     const user = await User.findByIdAndUpdate(
       userId,
       { name, email },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
     if (!user) {
       throw new NotFoundError('Пользователь с id не найден');
@@ -96,6 +92,9 @@ module.exports.updateMe = async (req, res, next) => {
   } catch (error) {
     if (error.name === 'ValidationError') {
       next(new NotValidError('Некорректные данные'));
+    }
+    if (error.code === 11000) {
+      next(new ConflictError('Такой email существует'));
     } else {
       next(error);
     }

@@ -11,7 +11,7 @@ router.patch(
       email: Joi.string().required().email(),
     }),
   }),
-  updateMe
+  updateMe,
 );
 
 module.exports = router;

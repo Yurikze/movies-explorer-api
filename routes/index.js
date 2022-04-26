@@ -12,10 +12,10 @@ const appRouter = (app) => {
       body: Joi.object().keys({
         email: Joi.string().required().email(),
         password: Joi.string().required().min(8),
-        name: Joi.string().min(2).max(30),
+        name: Joi.string().required().min(2).max(30),
       }),
     }),
-    createUser
+    createUser,
   );
   app.post(
     '/signin',
@@ -25,12 +25,12 @@ const appRouter = (app) => {
         password: Joi.string().required(),
       }),
     }),
-    login
+    login,
   );
   app.post('/signout', logout);
   app.use('/users', auth, usersRouter);
   app.use('/movies', auth, moviesRouter);
-  app.use('*', (req, res, next) => {
+  app.use('*', auth, (req, res, next) => {
     next(new NotFoundError('Страница не найдена'));
   });
 };

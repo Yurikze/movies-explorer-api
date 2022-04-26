@@ -54,18 +54,28 @@ module.exports.getMovies = async (req, res, next) => {
 };
 
 module.exports.removeMovie = (req, res, next) => {
-  Movie.findById(req.params.movieId).then((movie) => {
-    if (!movie) {
-      throw new NotFoundError('Фильм не найден');
-    }
-    if (movie.owner._id.toString() !== req.user._id.toString()) {
-      throw new ForbiddenError('Вы не можете удалить чужой фильм');
-    }
-    return movie
-      .remove()
-      .then(() => {
-        res.status(200).send({ message: 'Movie removed from favourite' });
-      })
-      .catch(next);
-  });
+  Movie.findById(req.params.movieId)
+    .then((movie) => {
+      if (!movie) {
+        throw new NotFoundError('Фильм не найден');
+      }
+      if (movie.owner._id.toString() !== req.user._id.toString()) {
+        throw new ForbiddenError('Вы не можете удалить чужой фильм');
+      }
+      return movie
+        .remove()
+        .then(() => {
+          res.status(200).send({ message: 'Movie removed from favourite' });
+        })
+        .catch((error) => {
+          next(error);
+        });
+    })
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        next(new NotValidError('Некорректный id фильма'));
+      } else {
+        next(error);
+      }
+    });
 };
