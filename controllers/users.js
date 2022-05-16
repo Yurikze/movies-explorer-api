@@ -11,10 +11,21 @@ module.exports.createUser = async (req, res, next) => {
   try {
     const hashPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ email, password: hashPassword, name });
-    res.status(200).send({
-      email: user.email,
-      name: user.name,
-    });
+    const token = jwt.sign(
+      { _id: user._id },
+      NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+      { expiresIn: '7d' },
+    );
+    res
+      .cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+      })
+      .status(200)
+      .send({
+        email: user.email,
+        name: user.name,
+      });
   } catch (err) {
     if (err.name === 'MongoServerError' && err.code === 11000) {
       next(new ConflictError('Такой Email существует'));
@@ -69,7 +80,7 @@ module.exports.getMe = async (req, res, next) => {
     if (!user) {
       throw new NotFoundError('Пользователь с id не найден');
     }
-    res.status(200).send({ data: user });
+    res.status(200).send(user);
   } catch (error) {
     next(error);
   }

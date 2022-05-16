@@ -11,7 +11,7 @@ const error = require('./middlewares/error');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const limiter = require('./middlewares/limiter');
 
-const { PORT = 3000, DB = 'mongodb://localhost:27017/bitfilmsdb' } = process.env;
+const { PORT = 4000, DB = 'mongodb://localhost:27017/bitfilmsdb' } = process.env;
 const app = express();
 
 app.use(cookieParser());
