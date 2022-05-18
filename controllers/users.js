@@ -20,9 +20,12 @@ module.exports.createUser = async (req, res, next) => {
       .cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
+        sameSite: 'none',
+        secure: true,
       })
       .status(200)
       .send({
+        _id: user._id,
         email: user.email,
         name: user.name,
       });
@@ -52,8 +55,11 @@ module.exports.login = (req, res, next) => {
         .cookie('jwt', token, {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
+          sameSite: 'none',
+          secure: true,
         })
         .send({
+          _id: user._id,
           email: user.email,
           name: user.name,
         });
@@ -65,7 +71,8 @@ module.exports.logout = (req, res) => {
   res
     .cookie('jwt', 'jwt.token.revoked', {
       httpOnly: true,
-      sameSite: true,
+      sameSite: 'none',
+      secure: true,
       maxAge: -1,
     })
     .send({
