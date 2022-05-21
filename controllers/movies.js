@@ -44,8 +44,11 @@ module.exports.saveMovie = (req, res, next) => {
 };
 
 module.exports.getMovies = async (req, res, next) => {
+  const userId = req.user._id;
   try {
-    const movies = await Movie.find({}).sort({ createdAt: 'desc' });
+    const movies = await Movie.find({ owner: userId }).sort({
+      createdAt: 'desc',
+    });
     res.status(200).send(movies);
   } catch (error) {
     next(error);
